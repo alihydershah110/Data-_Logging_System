@@ -1,0 +1,100 @@
+// Google Apps Script URL 
+const char* serverName = 
+"https://script.google.com/macros/s/AKfycbzV89U3buphk_rYhlgklNANt77_GaiI6lZ2bNFMQWsCFvK5ZkZLOF1Y-yLpRlLxueUxg/exec"; 
+// Define the ADC (Analog to Digital Converter) pins 
+const int potPin1 = 32; // GPIO 32 
+const int potPin2 = 33; // GPIO 33 
+const int potPin3 = 34; // GPIO 34 
+const int potPin4 = 35; // GPIO 35 
+// Define the digital input pins 
+const int digitalPin1 = 25; // GPIO 25 
+const int digitalPin2 = 26; // GPIO 26 
+const int digitalPin3 = 27; // GPIO 27 
+const int digitalPin4 = 14; // GPIO 14 
+void setup() { 
+ Serial.begin(9600); 
+ Serial.print("Connecting to WiFi"); 
+ WiFi.begin(ssid, password, 6); 
+ while (WiFi.status() != WL_CONNECTED) { 
+ delay(100); 
+ Serial.print("."); 
+ } 
+ Serial.println(" Connected!"); 
+ // Set the potentiometer pins as input 
+ pinMode(potPin1, INPUT); 
+ pinMode(potPin2, INPUT); 
+CEA REPORT 
+ pinMode(potPin3, INPUT); 
+ pinMode(potPin4, INPUT); 
+ // Set the digital input pins as input 
+ pinMode(digitalPin1, INPUT); 
+ pinMode(digitalPin2, INPUT); 
+ pinMode(digitalPin3, INPUT); 
+ pinMode(digitalPin4, INPUT); 
+} 
+void loop() { 
+ if (WiFi.status() == WL_CONNECTED) { 
+ // Read the analog values from each potentiometer 
+ int potValue1 = analogRead(potPin1); 
+ int potValue2 = analogRead(potPin2); 
+ int potValue3 = analogRead(potPin3); 
+ int potValue4 = analogRead(potPin4); 
+ // Read the digital values from each digital input 
+ int digitalInput1 = digitalRead(digitalPin1); 
+ int digitalInput2 = digitalRead(digitalPin2); 
+ int digitalInput3 = digitalRead(digitalPin3); 
+ int digitalInput4 = digitalRead(digitalPin4); 
+ // Print the values to the Serial Monitor 
+ Serial.print("Potentiometer 1: "); 
+ Serial.print(potValue1); 
+ Serial.print("\tPotentiometer 2: "); 
+ Serial.print(potValue2); 
+ Serial.print("\tPotentiometer 3: "); 
+CEA REPORT 
+ Serial.print(potValue3); 
+ Serial.print("\tPotentiometer 4: "); 
+ Serial.println(potValue4); 
+ Serial.print("Digital Input 1: "); 
+ Serial.print(digitalInput1); 
+ Serial.print("\tDigital Input 2: "); 
+ Serial.print(digitalInput2); 
+ Serial.print("\tDigital Input 3: "); 
+ Serial.print(digitalInput3); 
+ Serial.print("\tDigital Input 4: "); 
+ Serial.println(digitalInput4); 
+ // Prepare the data as a JSON object 
+ String postData = "{\"potValue1\":" + String(potValue1) + 
+ ", \"potValue2\":" + String(potValue2) + 
+ ", \"potValue3\":" + String(potValue3) + 
+ ", \"potValue4\":" + String(potValue4) + 
+ ", \"digitalInput1\":" + String(digitalInput1) + 
+ ", \"digitalInput2\":" + String(digitalInput2) + 
+ ", \"digitalInput3\":" + String(digitalInput3) + 
+ ", \"digitalInput4\":" + String(digitalInput4) + "}"; 
+ // Print the JSON data to the Serial Monitor 
+ Serial.println("Sending data: " + postData); 
+ // Make the HTTP POST request 
+ HTTPClient http; 
+ http.begin(serverName); 
+CEA REPORT 
+ http.addHeader("Content-Type", "application/json"); 
+ http.setTimeout(5000); // Set timeout to 15 seconds 
+ int httpResponseCode = http.POST(postData); 
+ // Print response for debugging 
+ if (httpResponseCode > 0) { 
+ String response = http.getString(); 
+ Serial.print("HTTP Response Code: "); 
+ Serial.println(httpResponseCode); 
+ Serial.print("Response: "); 
+ Serial.println(response); 
+ } else { 
+ Serial.print("Error on sending POST: "); 
+ Serial.println(httpResponseCode); } 
+ // Free resources 
+ http.end(); 
+ } else { 
+ Serial.println("WiFi Disconnected"); 
+ } 
+ // Add a small delay to avoid overwhelming the server 
+ delay(3000); // Adjust delay as needed 
+} 
